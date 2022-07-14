@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, FilterQuery } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ResponseData } from 'src/common/types/response-data';
-import { CreateUrlDto } from './dto/create-url.dto';
-import { Url, UrlDocument } from './entities/url.entity';
-import { GeneratorHelper } from './helpers/generator.helper';
 import { ConfigService } from '@nestjs/config';
+import { GeneratorHelper } from '../helpers/generator.helper';
+import { CreateUrlDto } from '../dto/create-url.dto';
+import { Url, UrlDocument } from '../entities/url.entity';
 
 @Injectable()
 export class UrlsService {
@@ -31,5 +31,21 @@ export class UrlsService {
 
     createResponse.success = 'URL_GENERATED_SUCCESSFULLY';
     return createResponse;
+  }
+
+  async findOne(filter: FilterQuery<UrlDocument>, projection?: any) {
+    const findOneResponse = new ResponseData<UrlDocument>();
+
+    const url = await this.urlModel.findOne(filter, projection).exec();
+
+    if (!url) {
+      findOneResponse.error = 'URL_DOES_NOT_EXIST';
+      return findOneResponse;
+    }
+
+    findOneResponse.data = url;
+    findOneResponse.success = 'URL_FETCHED_SUCCESSFULLY';
+
+    return findOneResponse;
   }
 }
